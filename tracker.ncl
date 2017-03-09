@@ -3,18 +3,14 @@
 
 begin
   fname = "data/PARTICLE.DAT"
-  ; out = "particle.nc"
-  ; system("rm " + out )
 
   nh = 96                       ;no of hours
   np = 100                      ;no of particles
   inter = 2                     ;out put frequncy (should be per hour)
 
-  ;
   nlines = nh * np * inter
   epsize = nh * inter                   ; each particle size
 
-  ; o = addfile(out, "c")
   fil = asciiread(fname,-1, "float")
   init_data = fil(0:2)
   data = onedtond(fil(3:), (/nlines, 16/))
