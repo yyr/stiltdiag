@@ -26,7 +26,7 @@ begin
   epsize = nh * inter                   ; each particle size
 
   fil = asciiread(fname,-1, "float")
-  init_data = fil(0:2)
+  origin = fil(0:2)
   data = onedtond(fil(3:), (/nlines, 16/))
 
   lat = new(epsize, float)
@@ -60,9 +60,6 @@ begin
   pres@gsLineThicknessF = 0.5                ; line thickness
   traj = (/1,10,53,67,80/)          ; choose which trajectories to plot
 
-  mres  = True                               ; marker resources
-  first = True                               ; start of traj resources
-
 ;  cmap = RGBtoCmap("mpl_ylorrd.rgb")
   rgb = asciiread("mpl_ylorrd.rgb", -1, "float")
   cmap = onedtond (rgb, (/dimsizes(rgb)/3, 3/))  ; back to triplets
@@ -81,6 +78,12 @@ begin
       gsn_polyline(wks, map, (/lon(j),lon(j+1)/), (/lat(j),lat(j+1)/), pres)
     end do
   end do
+
+  marker = True
+  marker@gsMarkerIndex  = 16
+  marker@gsMarkerSizeF  = 4.0         ; marker size
+  marker@gsMarkerColor  = "black"     ; marker color
+  gsn_polymarker(wks,map,origin(1), origin(0),marker) ; draw start of traj
 
 ; label bar resources
   res_lb                    = True
