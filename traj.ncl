@@ -31,7 +31,8 @@ begin
 
   lat = new(epsize, float)
   lon = new(epsize, float)
-  parht = new(epsize, float)
+  zagl = new(epsize, float)
+  zsfc = new(epsize, float)
   foot = new(epsize, float)
 
   wks = gsn_open_wks("pdf","traj")
@@ -69,12 +70,15 @@ begin
     do it = parts, nlines - 1, 100    ; doc
       lat(it/100) = data(it,2)
       lon(it/100) = data(it,3)
-      parht(it/100) = data(it,4)
+      zagl(it/100) = data(it,4)
+      zsfc(it/100) = data(it,5)
       foot(it/100) = data(it,6)
     end do
 
-    do j=0,dimsizes(parht)-2
-      pres@gsLineColor= GetFillColor(cnLevels,cmap,avg( (/parht(j),parht(j+1)/)))
+    zagl = zagl + zsfc
+
+    do j=0,dimsizes(zagl)-2
+      pres@gsLineColor= GetFillColor(cnLevels,cmap,avg( (/zagl(j),zagl(j+1)/)))
       gsn_polyline(wks, map, (/lon(j),lon(j+1)/), (/lat(j),lat(j+1)/), pres)
     end do
   end do
@@ -96,7 +100,7 @@ begin
   res_lb@lbMonoFillPattern  = True             ; Fill them all solid.
   res_lb@lbLabelFontHeightF = 0.010
   res_lb@lbLabelStride = 30
-  res_lb@lbTitleString = "Height from the ground (zagl)"
+  res_lb@lbTitleString = "Height from the Mean Sea Level"
   res_lb@lbTitleFontHeightF = 0.015
 
   gsn_labelbar_ndc(wks, dimsizes(cnLevels)+1, flt2string(cnLevels), .30, .30, res_lb)
