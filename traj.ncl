@@ -92,8 +92,11 @@ begin
   res_lb@lbFillColors       = cmap(2:,:)       ; Colors for boxes.
   res_lb@lbMonoFillPattern  = True             ; Fill them all solid.
   res_lb@lbLabelFontHeightF = 0.010
+  res_lb@lbLabelStride = 30
+  res_lb@lbTitleString = "Height from the ground (zagl)"
+  res_lb@lbTitleFontHeightF = 0.015
 
-  gsn_labelbar_ndc(wks, dimsizes(cnLevels)+1, flt2string(fspan(0,6000,11)), .30, .30, res_lb)
+  gsn_labelbar_ndc(wks, dimsizes(cnLevels)+1, flt2string(cnLevels), .30, .30, res_lb)
 
   draw(map)
   frame(wks)
