@@ -1,6 +1,21 @@
 ; Copyright (C) Yagnesh Raghava Yakkala. http://yagnesh.org
 ; Created: Wednesday, March  8 2017
 
+;_____________________________________________________________________________
+; procedure: add_traj
+; Doc:
+;_____________________________________________________________________________
+undef("add_traj")
+procedure add_traj(wks, map, lats, lons, pres)
+local lats, lons, pres
+
+begin
+  str = unique_string("traj")
+  map@$str$ = gsn_add_polyline(wks,map,lats,lons,pres)
+
+  return
+end
+
 begin
   fname = "data/PARTICLE.DAT"
 
@@ -20,18 +35,12 @@ begin
   parht = new(epsize, float)
   foot = new(epsize, float)
 
-  xyres             = True
-  xyres@gsnDraw     = False
-  xyres@gsnFrame    = False
-  xyres@gsnMaximize = True
-
-  wks = gsn_open_wks("x11","draw_order")
+  wks = gsn_open_wks("pdf","traj")
 
   res                      = True
-
   res@gsnDraw              = False
   res@gsnFrame             = False
-  res@gsnMaximize          = True
+  res@gsnMaximize = True
 
   res@mpOutlineOn          = True
   res@mpLimitMode = "Corners"
@@ -40,11 +49,23 @@ begin
   res@mpLeftCornerLonF      = 60
   res@mpRightCornerLonF     = 100
 
-  plot = gsn_csm_map(wks,res)
+  res@tiMainString    = "Trajectories"  ; title
+  ; res@gsnCenterString = "markers every 4th time step"   ; center string
 
-  gres                 = True
-  gres@gsFillColor     = "yellow"
+  map = gsn_csm_map(wks,res)
 
+  pres                 = True
+  pres@gsLineColor     = "yellow"
+  pres@gsLineThicknessF = 0.5                ; line thickness
+  traj = (/1,10,53,67,80/)          ; choose which trajectories to plot
+  colors= (/"red","blue","dark green","grey","magenta"/) ; line color
+
+  mres  = True                               ; marker resources
+  first = True                               ; start of traj resources
+
+  dum  = new(1,graphic)
+
+  c = 0
   do parts = 0 , np - 1, 1    ; doc
     do it = parts, nlines - 1, 100    ; doc
       lat(it/100) = data(it,2)
@@ -52,10 +73,13 @@ begin
       parht(it/100) = data(it,4)
       foot(it/100) = data(it,6)
     end do
-    dum = gsn_add_polygon(wks,plot,lon,lat,gres)
-    print(" " + parts)
-  end do
 
-  draw(plot)
+    if ( any(traj .eq. parts )) then
+      pres@gsLineColor     = colors(c)
+      add_traj(wks,map,lon, lat, pres)      ; draw the traj
+      c = c+1
+    end if
+  end do
+  draw(map)
   frame(wks)
 end
