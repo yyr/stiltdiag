@@ -12,7 +12,6 @@ local lats, lons, pres
 begin
   str = unique_string("traj")
   map@$str$ = gsn_add_polyline(wks,map,lats,lons,pres)
-
   return
 end
 
@@ -43,6 +42,9 @@ begin
   res@gsnMaximize = True
 
   res@mpOutlineOn          = True
+  res@mpFillOn = False
+  res@mpDataBaseVersion = "MediumRes"
+
   res@mpLimitMode = "Corners"
   res@mpLeftCornerLatF      = 0
   res@mpRightCornerLatF     = 30
@@ -55,17 +57,17 @@ begin
   map = gsn_csm_map(wks,res)
 
   pres                 = True
-  pres@gsLineColor     = "yellow"
   pres@gsLineThicknessF = 0.5                ; line thickness
   traj = (/1,10,53,67,80/)          ; choose which trajectories to plot
-  colors= (/"red","blue","dark green","grey","magenta"/) ; line color
 
   mres  = True                               ; marker resources
   first = True                               ; start of traj resources
 
-  dum  = new(1,graphic)
+;  cmap = RGBtoCmap("mpl_ylorrd.rgb")
+  rgb = asciiread("mpl_ylorrd.rgb", -1, "float")
+  cmap = onedtond (rgb, (/dimsizes(rgb)/3, 3/))  ; back to triplets
+  cnLevels=fspan(0,6000,121)
 
-  c = 0
   do parts = 0 , np - 1, 1    ; doc
     do it = parts, nlines - 1, 100    ; doc
       lat(it/100) = data(it,2)
@@ -74,12 +76,25 @@ begin
       foot(it/100) = data(it,6)
     end do
 
-    if ( any(traj .eq. parts )) then
-      pres@gsLineColor     = colors(c)
-      add_traj(wks,map,lon, lat, pres)      ; draw the traj
-      c = c+1
-    end if
+    do j=0,dimsizes(parht)-2
+      pres@gsLineColor= GetFillColor(cnLevels,cmap,avg( (/parht(j),parht(j+1)/)))
+      gsn_polyline(wks, map, (/lon(j),lon(j+1)/), (/lat(j),lat(j+1)/), pres)
+    end do
   end do
+
+; label bar resources
+  res_lb                    = True
+  res_lb@vpWidthF           = 0.50
+  res_lb@vpHeightF          = 0.10
+  res_lb@lbPerimOn          = False            ; Turn off perimeter.
+  res_lb@lbOrientation      = "Horizontal"     ; Default is vertical.
+  res_lb@lbLabelAlignment   = "InteriorEdges"  ; Default is "BoxCenters".
+  res_lb@lbFillColors       = cmap(2:,:)       ; Colors for boxes.
+  res_lb@lbMonoFillPattern  = True             ; Fill them all solid.
+  res_lb@lbLabelFontHeightF = 0.010
+
+  gsn_labelbar_ndc(wks, dimsizes(cnLevels)+1, flt2string(fspan(0,6000,11)), .30, .30, res_lb)
+
   draw(map)
   frame(wks)
 end
