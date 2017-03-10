@@ -1,19 +1,7 @@
 ; Copyright (C) Yagnesh Raghava Yakkala. http://yagnesh.org
 ; Created: Wednesday, March  8 2017
 
-;_____________________________________________________________________________
-; procedure: add_traj
-; Doc:
-;_____________________________________________________________________________
-undef("add_traj")
-procedure add_traj(wks, map, lats, lons, pres)
-local lats, lons, pres
-
-begin
-  str = unique_string("traj")
-  map@$str$ = gsn_add_polyline(wks,map,lats,lons,pres)
-  return
-end
+load "./stiltdiag.ncl"
 
 begin
   fname = "particle.nc"
