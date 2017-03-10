@@ -16,24 +16,14 @@ begin
 end
 
 begin
-  fname = "data/PARTICLE.DAT"
+  fname = "particle.nc"
+  fh = addfile(fname, "r")
 
-  nh = 96                       ;no of hours
-  np = 100                      ;no of particles
-  inter = 2                     ;out put frequncy (should be per hour)
+  origin = fh->ORIGIN
+  data = fh->PARTICLE_DATA
 
-  nlines = nh * np * inter
-  epsize = nh * inter                   ; each particle size
-
-  fil = asciiread(fname,-1, "float")
-  origin = fil(0:2)
-  data = onedtond(fil(3:), (/nlines, 16/))
-
-  lat = new(epsize, float)
-  lon = new(epsize, float)
-  zagl = new(epsize, float)
-  zsfc = new(epsize, float)
-  foot = new(epsize, float)
+  dims = dimsizes(data)
+  np = dims(1)
 
   wks = gsn_open_wks("pdf","traj")
 
@@ -51,9 +41,7 @@ begin
   res@mpRightCornerLatF     = 30
   res@mpLeftCornerLonF      = 60
   res@mpRightCornerLonF     = 100
-
-  res@tiMainString    = "Trajectories"  ; title
-  ; res@gsnCenterString = "markers every 4th time step"   ; center string
+  res@tiMainString    = "Trajectories"
 
   map = gsn_csm_map(wks,res)
 
@@ -66,17 +54,14 @@ begin
   cmap = onedtond (rgb, (/dimsizes(rgb)/3, 3/))  ; back to triplets
   cnLevels=fspan(0,6000,121)
 
-  do parts = 0 , np - 1, 1    ; doc
-    do it = parts, nlines - 1, 100    ; doc
-      lat(it/100) = data(it,2)
-      lon(it/100) = data(it,3)
-      zagl(it/100) = data(it,4)
-      zsfc(it/100) = data(it,5)
-      foot(it/100) = data(it,6)
-    end do
+  do it = 0 , np - 1, 1    ; doc
+    lat = data(:,it,2)
+    lon = data(:,it,3)
+    zagl = data(:,it,4)
+    zsfc = data(:,it,5)
+    foot = data(:,it,6)
 
     zagl = zagl + zsfc
-
     do j=0,dimsizes(zagl)-2
       pres@gsLineColor= GetFillColor(cnLevels,cmap,avg( (/zagl(j),zagl(j+1)/)))
       gsn_polyline(wks, map, (/lon(j),lon(j+1)/), (/lat(j),lat(j+1)/), pres)
