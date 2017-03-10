@@ -49,4 +49,5 @@ begin
   ; write_matrix (data1(0,0:2,:), "16f7.2", False)
   ; write_matrix (data(0:2,:), "16f7.2", False)
   o->PARTICLE_DATA = data
+  o->ORIGIN = origin
 end
